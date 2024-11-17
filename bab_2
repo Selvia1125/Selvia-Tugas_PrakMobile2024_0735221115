@@ -1,0 +1,170 @@
+import 'dart:collection';
+
+// Enum untuk kategori produk
+enum KategoriProduk { DataManagement, NetworkAutomation }
+
+// Kelas Produk dengan validasi harga
+class Produk {
+  String namaProduk;
+  double _harga;
+  KategoriProduk kategori;
+  int jumlahTerjual;
+
+  Produk({
+    required this.namaProduk,
+    required double harga,
+    required this.kategori,
+    this.jumlahTerjual = 0,
+  }) : _harga = harga {
+    _validasiHarga();
+  }
+
+  // Getter dan setter untuk harga dengan validasi
+  double get harga => _harga;
+  set harga(double value) {
+    _harga = value;
+    _validasiHarga();
+  }
+
+  // Validasi harga berdasarkan kategori
+  void _validasiHarga() {
+    if (kategori == KategoriProduk.NetworkAutomation && _harga < 200000) {
+      throw ArgumentError('Harga NetworkAutomation harus minimal 200.000');
+    } else if (kategori == KategoriProduk.DataManagement && _harga >= 200000) {
+      throw ArgumentError('Harga DataManagement harus di bawah 200.000');
+    }
+  }
+
+  // Metode fungsi di definisikan untuk memberi diskon produk NetworkAutomation jika syarat terpenuhi
+  void beriDiskon() {
+    if (kategori == KategoriProduk.NetworkAutomation && jumlahTerjual > 50) {
+      double hargaSetelahDiskon = _harga * 0.85;
+      _harga = hargaSetelahDiskon >= 200000 ? hargaSetelahDiskon : 200000;
+    }
+  }
+}
+
+// Enum untuk peran karyawan
+enum PeranKaryawan { Developer, NetworkEngineer, Manager }
+
+// Mixin Kinerja untuk menambah atau mengurangi produktivitas
+mixin KinerjaMixin {
+  int produktivitas = 0;
+
+  // Metode untuk memperbarui produktivitas dengan validasi
+  void updateProduktivitas(int nilai) {
+    if (nilai < 0 || nilai > 100)
+      throw ArgumentError('Produktivitas harus di antara 0-100');
+    produktivitas = nilai;
+  }
+}
+
+// Kelas dasar Karyawan
+abstract class Karyawan with KinerjaMixin {
+  final String nama;
+  final int umur;
+  final PeranKaryawan peran;
+
+  Karyawan({
+    required this.nama,
+    required this.umur,
+    required this.peran,
+  });
+}
+
+// Kelas KaryawanTetap dan KaryawanKontrak
+class KaryawanTetap extends Karyawan {
+  KaryawanTetap(
+      {required String nama, required int umur, required PeranKaryawan peran})
+      : super(nama: nama, umur: umur, peran: peran);
+}
+
+class KaryawanKontrak extends Karyawan {
+  KaryawanKontrak(
+      {required String nama, required int umur, required PeranKaryawan peran})
+      : super(nama: nama, umur: umur, peran: peran);
+}
+
+// Enum untuk fase proyek
+enum FaseProyek { Perencanaan, Pengembangan, Evaluasi }
+
+// Kelas Proyek dengan transisi fase
+class Proyek {
+  FaseProyek fase = FaseProyek.Perencanaan;
+  int jumlahHariBerjalan = 0;
+  List<Karyawan> timProyek = [];
+
+  // Metode untuk menambah karyawan ke proyek
+  void tambahKaryawan(Karyawan karyawan) {
+    timProyek.add(karyawan);
+  }
+
+  // Metode untuk transisi fase
+  void transisiFase() {
+    if (fase == FaseProyek.Perencanaan && timProyek.length >= 5) {
+      fase = FaseProyek.Pengembangan;
+    } else if (fase == FaseProyek.Pengembangan && jumlahHariBerjalan > 45) {
+      fase = FaseProyek.Evaluasi;
+    }
+  }
+}
+
+// Kelas untuk mengelola karyawan aktif dan non-aktif
+class ManajemenKaryawan {
+  List<Karyawan> karyawanAktif = [];
+  List<Karyawan> karyawanNonAktif = [];
+
+  // Menambah karyawan aktif jika kuota belum penuh
+  void tambahKaryawan(Karyawan karyawan) {
+    if (karyawanAktif.length >= 20) {
+      throw Exception('Karyawan aktif sudah mencapai batas maksimum');
+    }
+    karyawanAktif.add(karyawan);
+  }
+
+  // Mengubah status karyawan menjadi non-aktif saat resign
+  void resignKaryawan(Karyawan karyawan) {
+    karyawanAktif.remove(karyawan);
+    karyawanNonAktif.add(karyawan);
+  }
+}
+
+void main() {
+  // Contoh penggunaan
+  var produk1 = Produk(
+    namaProduk: 'Data Storage Solution',
+    harga: 150000,
+    kategori: KategoriProduk.DataManagement,
+  );
+
+  var produk2 = Produk(
+    namaProduk: 'Advanced Network Automation',
+    harga: 250000,
+    kategori: KategoriProduk.NetworkAutomation,
+    jumlahTerjual: 51,
+  );
+
+  produk2.beriDiskon();
+  print('Harga produk2 setelah diskon: ${produk2.harga}');
+
+  var karyawan1 =
+      KaryawanTetap(nama: 'Alice', umur: 30, peran: PeranKaryawan.Developer);
+  var karyawan2 =
+      KaryawanKontrak(nama: 'Bob', umur: 35, peran: PeranKaryawan.Manager);
+
+  var proyek1 = Proyek();
+  proyek1.tambahKaryawan(karyawan1);
+  proyek1.tambahKaryawan(karyawan2);
+
+  proyek1.transisiFase();
+  print('Fase proyek saat ini: ${proyek1.fase}');
+
+  var manajemenKaryawan = ManajemenKaryawan();
+  manajemenKaryawan.tambahKaryawan(karyawan1);
+  manajemenKaryawan.tambahKaryawan(karyawan2);
+
+  manajemenKaryawan.resignKaryawan(karyawan1);
+  print('Jumlah karyawan aktif: ${manajemenKaryawan.karyawanAktif.length}');
+  print(
+      'Jumlah karyawan non-aktif: ${manajemenKaryawan.karyawanNonAktif.length}');
+}
