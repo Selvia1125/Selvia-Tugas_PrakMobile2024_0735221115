@@ -1,0 +1,175 @@
+// Enum untuk Role pengguna
+enum Role { Admin, Customer }
+
+// Class Product untuk menyimpan informasi produk
+class Product {
+  final String productName;
+  final double price;
+  bool inStock;
+
+  Product({
+    required this.productName,
+    required this.price,
+    this.inStock = true,
+  });
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Product &&
+          runtimeType == other.runtimeType &&
+          productName == other.productName;
+
+  @override
+  int get hashCode => productName.hashCode;
+}
+
+// Class Exception kustom
+class ProductNotAvailableException implements Exception {
+  final String message;
+  ProductNotAvailableException(this.message);
+}
+
+// Class dasar User
+abstract class User {
+  String name;
+  int age;
+  late List<Product> products;
+  Role? role;
+
+  User({
+    required this.name,
+    required this.age,
+  }) {
+    products = [];
+  }
+
+  void viewProducts() {
+    if (products.isEmpty) {
+      print('Tidak ada produk untuk ditampilkan.');
+      return;
+    }
+    print('\nDaftar Produk untuk ${name}:');
+    for (var product in products) {
+      print(
+          '- ${product.productName}: \$${product.price} (${product.inStock ? "Tersedia" : "Tidak Tersedia"})');
+    }
+  }
+}
+
+// Class AdminUser yang mewarisi User
+class AdminUser extends User {
+  AdminUser({required String name, required int age})
+      : super(name: name, age: age) {
+    role = Role.Admin;
+  }
+
+  void addProduct(Product product, Map<String, Product> productCatalog,
+      Set<Product> uniqueProducts) {
+    try {
+      if (!product.inStock) {
+        throw ProductNotAvailableException(
+            'Produk ${product.productName} tidak tersedia dalam stok.');
+      }
+
+      products.add(product);
+      productCatalog[product.productName] = product;
+      uniqueProducts.add(product);
+      print('Produk ${product.productName} berhasil ditambahkan.');
+    } on ProductNotAvailableException catch (e) {
+      print('Error: ${e.message}');
+    } catch (e) {
+      print('Terjadi kesalahan: $e');
+    }
+  }
+
+  void removeProduct(String productName, Map<String, Product> productCatalog,
+      Set<Product> uniqueProducts) {
+    try {
+      var product = productCatalog[productName];
+      if (product != null) {
+        products.removeWhere((p) => p.productName == productName);
+        productCatalog.remove(productName);
+        uniqueProducts.removeWhere((p) => p.productName == productName);
+        print('Produk $productName berhasil dihapus.');
+      } else {
+        print('Produk $productName tidak ditemukan.');
+      }
+    } catch (e) {
+      print('Terjadi kesalahan saat menghapus produk: $e');
+    }
+  }
+}
+
+// Class CustomerUser yang mewarisi User
+class CustomerUser extends User {
+  CustomerUser({required String name, required int age})
+      : super(name: name, age: age) {
+    role = Role.Customer;
+  }
+}
+
+// Fungsi asinkron untuk mensimulasikan pengambilan detail produk
+Future<Product> fetchProductDetails(String productName, double price) async {
+  await Future.delayed(Duration(seconds: 2)); // Simulasi network delay
+  return Product(
+    productName: productName,
+    price: price,
+  );
+}
+
+// Fungsi main untuk demonstrasi
+void main() async {
+  // Inisialisasi collections
+  Map<String, Product> productCatalog = {};
+  Set<Product> uniqueProducts = {};
+
+  // Membuat instance admin dan customer
+  var admin = AdminUser(name: 'Admin John', age: 30);
+  var customer = CustomerUser(name: 'Customer Alice', age: 25);
+
+  print('Menunggu data produk...');
+
+  // Menggunakan async-await untuk mendapatkan produk
+  try {
+    var laptop = await fetchProductDetails('Laptop', 1200.0);
+    var phone = await fetchProductDetails('Smartphone', 800.0);
+    var tablet = await fetchProductDetails('Tablet', 500.0);
+
+    // Admin menambahkan produk
+    admin.addProduct(laptop, productCatalog, uniqueProducts);
+    admin.addProduct(phone, productCatalog, uniqueProducts);
+    admin.addProduct(tablet, productCatalog, uniqueProducts);
+
+    // Mencoba menambahkan produk duplikat
+    admin.addProduct(laptop, productCatalog, uniqueProducts);
+
+    // Mengubah status stok produk
+    laptop.inStock = false;
+
+    // Mencoba menambahkan produk yang tidak tersedia
+    admin.addProduct(laptop, productCatalog, uniqueProducts);
+
+    // Menampilkan produk untuk admin dan customer
+    admin.viewProducts();
+    customer.viewProducts();
+
+    // Admin menghapus produk
+    admin.removeProduct('Smartphone', productCatalog, uniqueProducts);
+
+    print('\nSetelah menghapus produk:');
+    admin.viewProducts();
+
+    // Menampilkan catalog dan unique products
+    print('\nProduct Catalog:');
+    productCatalog.forEach((key, value) => print(
+        '$key: \$${value.price} (${value.inStock ? "Tersedia" : "Tidak Tersedia"})'));
+
+    print('\nUnique Products:');
+    for (var product in uniqueProducts) {
+      print('${product.productName}: \$${product.price}');
+    }
+  } catch (e) {
+    print('Terjadi kesalahan: $e');
+  }
+}
