@@ -1,0 +1,203 @@
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(EcommerceApp());
+}
+
+class EcommerceApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: EcommerceHome(),
+    );
+  }
+}
+
+class EcommerceHome extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          'Ecommerce',
+          style: TextStyle(color: Colors.black),
+        ),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        centerTitle: false,
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Search bar
+              TextField(
+                decoration: InputDecoration(
+                  prefixIcon: Icon(Icons.search),
+                  hintText: 'Search',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
+              SizedBox(height: 16),
+              // Menu buttons
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _buildMenuButton(Icons.favorite, 'Favorites'),
+                  _buildMenuButton(Icons.history, 'History'),
+                  _buildMenuButton(Icons.person, 'Following'),
+                  _buildMenuButton(Icons.notifications, 'Notifications'),
+                ],
+              ),
+              SizedBox(height: 16),
+              // Banner
+              Container(
+                height: 150,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  image: DecorationImage(
+                    image: NetworkImage(
+                        'https://static.vecteezy.com/system/resources/thumbnails/011/871/820/small/online-shopping-on-phone-buy-sell-business-digital-web-banner-application-money-advertising-payment-ecommerce-illustration-search-vector.jpg'), // Replace with your URL
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  'Toko Online',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    backgroundColor: Colors.yellow,
+                  ),
+                ),
+              ),
+              SizedBox(height: 16),
+              // Horizontal list
+              _buildSectionTitle('Title'),
+              SizedBox(height: 8),
+              SizedBox(
+                height: 80,
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  children: List.generate(4, (index) {
+                    return _buildCircleItem(
+                        'data:image/jpeg;base64,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',
+                        'Selvia');
+                  }),
+                ),
+              ),
+              SizedBox(height: 16),
+              // Grid list
+              _buildSectionTitle('Title'),
+              SizedBox(height: 8),
+              GridView.builder(
+                shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 8,
+                  mainAxisSpacing: 8,
+                  childAspectRatio: 3 / 4,
+                ),
+                itemCount: 4,
+                itemBuilder: (context, index) {
+                  return _buildGridItem(
+                      'https://static.retailworldvn.com/Products/Images/12217/319283/laptop-asus-vivobook-14-pentium-gold-7505-8gb-256gb-opi-win11-a1400ea-fhd75238-indie-black-1.jpg',
+                      'Asus Vivobook',
+                      '\7.500.000');
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        items: [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: ''),
+          BottomNavigationBarItem(icon: Icon(Icons.search), label: ''),
+          BottomNavigationBarItem(icon: Icon(Icons.shopping_cart), label: ''),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: ''),
+        ],
+        selectedItemColor: Colors.black,
+        unselectedItemColor: Colors.grey,
+      ),
+    );
+  }
+
+  Widget _buildMenuButton(IconData icon, String label) {
+    return Column(
+      children: [
+        CircleAvatar(
+          backgroundColor: Colors.grey[200],
+          child: Icon(icon, color: Colors.black),
+        ),
+        SizedBox(height: 4),
+        Text(label, style: TextStyle(fontSize: 12)),
+      ],
+    );
+  }
+
+  Widget _buildCircleItem(String imageUrl, String title) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      child: Column(
+        children: [
+          CircleAvatar(
+            radius: 30,
+            backgroundImage: NetworkImage(imageUrl),
+          ),
+          SizedBox(height: 4),
+          Text(title, style: TextStyle(fontSize: 12)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGridItem(String imageUrl, String title, String price) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        AspectRatio(
+          aspectRatio: 1,
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              image: DecorationImage(
+                image: NetworkImage(imageUrl),
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+        ),
+        SizedBox(height: 4),
+        Text(
+          title,
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+        ),
+        Text(
+          price,
+          style: TextStyle(color: Colors.grey, fontSize: 12),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          title,
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+        ),
+        Icon(Icons.arrow_forward, size: 16),
+      ],
+    );
+  }
+}
